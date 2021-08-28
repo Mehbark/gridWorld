@@ -4,6 +4,7 @@ export function $(selector) {
 export function $$(selector) {
   return document.querySelectorAll(selector);
 }
+//TODO: DOCUMENTATION AND WORK ON PREREQUISITES FOR AGENT INTEREACTION
 
 export class World {
   constructor(
