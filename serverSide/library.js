@@ -19,6 +19,7 @@ export class World {
     width,
     height,
     renderLocation,
+    agentList,
     MILLISECONDS_BETWEEN_TURNS = 3000,
     DEFAULT_BG_COLOR = "white",
     DEFAULT_FG_COLOR = "black",
@@ -28,6 +29,9 @@ export class World {
     this.height = height;
     this.width = width;
     this.renderLocation = renderLocation;
+    this.agentList = agentList;
+    this.lastCommandResultList = [];
+
     this.MILLISECONDS_BETWEEN_TURNS = MILLISECONDS_BETWEEN_TURNS;
     this.DEFAULT_BG_COLOR = DEFAULT_BG_COLOR;
     this.DEFAULT_FG_COLOR = DEFAULT_FG_COLOR;
@@ -44,6 +48,15 @@ export class World {
       }
       this.renderLocation.appendChild(line);
     }
+
+    this.agentList.forEach((agent) => {
+      if (agent.initFunction !== undefined) {
+        agent.initFunction();
+      }
+      this.changeCharacter(agent.x, agent.y, agent.character);
+      this.setForegroundColorOfCharacter(agent.x, agent.y);
+      this.setBackgroundColorOfCharacter(agent.x, agent.y);
+    });
   }
 
   getCharacter(x, y) {
@@ -62,10 +75,28 @@ export class World {
     }
   }
   setForegroundColorOfCharacter(x, y, color) {
-    this.getCharacter(x, y).style.color = color;
+    const toBeChanged = this.getCharacter(x, y);
+    if (toBeChanged === "out_of_bounds") {
+      return "out_of_bounds";
+    }
+    try {
+      toBeChanged.style.color = color;
+      return this.getTextInCharacter(x, y);
+    } catch (error) {
+      return "invalid_color";
+    }
   }
   setBackgroundColorOfCharacter(x, y, color) {
-    this.getCharacter(x, y).style.backgroundColor = color;
+    const toBeChanged = this.getCharacter(x, y);
+    if (toBeChanged === "out_of_bounds") {
+      return "out_of_bounds";
+    }
+    try {
+      toBeChanged.style.backgroundColor = color;
+      return this.getTextInCharacter(x, y);
+    } catch (error) {
+      return "invalid_color";
+    }
   }
 
   /**
@@ -118,6 +149,10 @@ export class World {
     if (toBeMoved === "out_of_bounds") {
       return "out_of_bounds";
     } else if (this.checkIfClear(toX, toY)) {
+      this.getCharacter(toX, toY).style.color = this.getCharacter(
+        fromX,
+        fromY
+      ).style.removeProperty("color");
       return this.changeCharacter(toX, toY, this.clearCharacter(fromX, fromY));
     } else {
       console.error(
@@ -125,8 +160,76 @@ export class World {
       );
       return `position_occupied_by_${this.getTextInCharacter(toX, toY)}`;
     }
+    //TODO: set foreground color of place moving away from to default and set fg color of place moving to to the old one's one
   }
 
+  // BEGIN AGENT HANDLING SECTION //
+
+  //Agent behavior functions should return an array of up to two items, one command, and one argument for the command if necessary
+  agentTurn(agent, lastResult) {
+    const agentRequest = agent.behaviorFunction(lastResult);
+    console.log(agentRequest);
+    if (agentRequest === undefined) { return "no_request"; }
+    switch (agentRequest[0]) {
+      case "move":
+        switch (agentRequest[1]) {
+          case "up":
+            return this.moveCharacter(agent.x, agent.y, agent.x, agent.y - 1);
+          case "down":
+            return this.moveCharacter(agent.x, agent.y, agent.x, agent.y + 1);
+          case "left":
+            return this.moveCharacter(agent.x, agent.y, agent.x - 1, agent.y);
+          case "right":
+            return this.moveCharacter(agent.x, agent.y, agent.x + 1, agent.y);
+          default:
+            return "no_arg";
+        } break;
+      case "check":
+        switch (agentRequest[1]) {
+          case "up":
+            return this.getCharacter(agent.x, agent.y, agent.x, agent.y - 1);
+          case "down":
+            return this.getCharacter(agent.x, agent.y, agent.x, agent.y + 1);
+          case "left":
+            return this.getCharacter(agent.x, agent.y, agent.x - 1, agent.y);
+          case "right":
+            return this.getCharacter(agent.x, agent.y, agent.x + 1, agent.y);
+          default:
+            return "no_arg";
+        } break;
+      case "get_board_width":
+        return this.width;
+      case "get_board_height":
+        return this.height;
+      case "change_char":
+        return this.changeCharacter(agent.x, agent.y, agentRequest[1]);
+      case "change_color":
+        return this.setForegroundColorOfCharacter(
+          agent.x,
+          agent.y,
+          agentRequest[1]
+        );
+      case "paint":
+        return this.setBackgroundColorOfCharacter(
+          agent.x,
+          agent.y,
+          agentRequest[1]
+        );
+      default:
+        return "no_request";
+    }
+  }
+
+  turn() {
+    for (let i = 0; i < this.agentList.length; i++) {
+      this.lastCommandResultList[i] = this.agentTurn(
+        this.agentList[i],
+        this.lastCommandResultList[i]
+      );
+    }
+  }
+
+  // END AGENT HANDLING SECTION //
   testRenderLocation() {
     console.log(this.renderLocation);
   }
