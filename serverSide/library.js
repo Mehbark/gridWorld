@@ -61,17 +61,21 @@ export class World {
 
   getCharacter(x, y) {
     try {
-      return this.renderLocation.children[y].children[x];
+      const result = this.renderLocation.children[y].children[x];
+      return result;
     } catch (error) {
-      console.error("That character is out of bounds!");
+      // console.error("That character is out of bounds!");
       return "out_of_bounds";
     }
   }
   getTextInCharacter(x, y) {
-    if (this.getCharacter(x, y) !== "out_of_bounds") {
-      return this.getCharacter(x, y).innerText;
-    } else {
+    if (
+      this.getCharacter(x, y) === "out_of_bounds" ||
+      this.getCharacter(x, y) === undefined
+    ) {
       return "out_of_bounds";
+    } else {
+      return this.getCharacter(x, y).innerText;
     }
   }
   setForegroundColorOfCharacter(x, y, color) {
@@ -141,7 +145,9 @@ export class World {
   }
 
   checkIfClear(x, y) {
-    return this.getTextInCharacter(x, y) === this.BACKGROUND_CHAR;
+    const text = this.getTextInCharacter(x, y);
+    // console.log(text);
+    return text === this.BACKGROUND_CHAR;
   }
 
   moveCharacter(fromX, fromY, toX, toY, agent) {
@@ -160,9 +166,12 @@ export class World {
       this.changeCharacter(toX, toY, this.clearCharacter(fromX, fromY));
       return this.getTextInCharacter(toX, toY);
     } else {
-      console.error(
-        `Position already occupied by "${this.getTextInCharacter(toX, toY)}"!`
-      );
+      // console.error(
+      //   `Position already occupied by "${this.getTextInCharacter(toX, toY)}"!`
+      // );
+      if (this.getTextInCharacter(toX, toY) === "out_of_bounds") {
+        return "out_of_bounds";
+      }
       return `position_occupied_by_${this.getTextInCharacter(toX, toY)}`;
     }
     //TODO: set foreground color of place moving away from to default and set fg color of place moving to to the old one's one
@@ -173,7 +182,6 @@ export class World {
   //Agent behavior functions should return an array of up to two items, one command, and one argument for the command if necessary
   agentTurn(agent, lastResult) {
     const agentRequest = agent.behaviorFunction(lastResult);
-    console.log(agentRequest);
     if (agentRequest === undefined) {
       return "no_request";
     }

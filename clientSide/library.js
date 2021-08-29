@@ -18,19 +18,27 @@ export class Agent {
 }
 
 export function exampleBehaviorFunction(lastResult) {
-  console.log(lastResult);
-  if (lastResult === this.character || lastResult === undefined) {
+  if (lastResult !== "out_of_bounds") {
     this.counter++;
     if (this.counter % 2 === 1) {
-      return ["paint", "blue"];
+      return ["paint", this.paintColor];
     } else {
-      return ["move", "right"];
+      return ["move", this.moveDirection];
+    }
+  } else {
+    if (this.moveDirection === "left") {
+      this.moveDirection = "right";
+      this.paintColor = "blue";
+    } else {
+      this.moveDirection = "left";
+      this.paintColor = "red";
     }
   }
-  return [];
 }
 export function exampleInitFunction(lastResult) {
   this.counter = 0;
+  this.moveDirection = "right";
+  this.paintColor = "blue";
 }
 
 function pass() {
