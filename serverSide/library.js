@@ -144,7 +144,7 @@ export class World {
     return this.getTextInCharacter(x, y) === this.BACKGROUND_CHAR;
   }
 
-  moveCharacter(fromX, fromY, toX, toY) {
+  moveCharacter(fromX, fromY, toX, toY, agent) {
     let toBeMoved = this.getCharacter(fromX, fromY);
     if (toBeMoved === "out_of_bounds") {
       return "out_of_bounds";
@@ -153,7 +153,12 @@ export class World {
         fromX,
         fromY
       ).style.removeProperty("color");
-      return this.changeCharacter(toX, toY, this.clearCharacter(fromX, fromY));
+      if (agent !== undefined) {
+        agent.x = toX;
+        agent.y = toY;
+      }
+      this.changeCharacter(toX, toY, this.clearCharacter(fromX, fromY));
+      return this.getTextInCharacter(toX, toY);
     } else {
       console.error(
         `Position already occupied by "${this.getTextInCharacter(toX, toY)}"!`
@@ -169,34 +174,86 @@ export class World {
   agentTurn(agent, lastResult) {
     const agentRequest = agent.behaviorFunction(lastResult);
     console.log(agentRequest);
-    if (agentRequest === undefined) { return "no_request"; }
+    if (agentRequest === undefined) {
+      return "no_request";
+    }
     switch (agentRequest[0]) {
       case "move":
         switch (agentRequest[1]) {
           case "up":
-            return this.moveCharacter(agent.x, agent.y, agent.x, agent.y - 1);
+            return this.moveCharacter(
+              agent.x,
+              agent.y,
+              agent.x,
+              agent.y - 1,
+              agent
+            );
           case "down":
-            return this.moveCharacter(agent.x, agent.y, agent.x, agent.y + 1);
+            return this.moveCharacter(
+              agent.x,
+              agent.y,
+              agent.x,
+              agent.y + 1,
+              agent
+            );
           case "left":
-            return this.moveCharacter(agent.x, agent.y, agent.x - 1, agent.y);
+            return this.moveCharacter(
+              agent.x,
+              agent.y,
+              agent.x - 1,
+              agent.y,
+              agent
+            );
           case "right":
-            return this.moveCharacter(agent.x, agent.y, agent.x + 1, agent.y);
+            return this.moveCharacter(
+              agent.x,
+              agent.y,
+              agent.x + 1,
+              agent.y,
+              agent
+            );
           default:
             return "no_arg";
-        } break;
+        }
+        break;
       case "check":
         switch (agentRequest[1]) {
           case "up":
-            return this.getCharacter(agent.x, agent.y, agent.x, agent.y - 1);
+            return this.getCharacter(
+              agent.x,
+              agent.y,
+              agent.x,
+              agent.y - 1,
+              agent
+            );
           case "down":
-            return this.getCharacter(agent.x, agent.y, agent.x, agent.y + 1);
+            return this.getCharacter(
+              agent.x,
+              agent.y,
+              agent.x,
+              agent.y + 1,
+              agent
+            );
           case "left":
-            return this.getCharacter(agent.x, agent.y, agent.x - 1, agent.y);
+            return this.getCharacter(
+              agent.x,
+              agent.y,
+              agent.x - 1,
+              agent.y,
+              agent
+            );
           case "right":
-            return this.getCharacter(agent.x, agent.y, agent.x + 1, agent.y);
+            return this.getCharacter(
+              agent.x,
+              agent.y,
+              agent.x + 1,
+              agent.y,
+              agent
+            );
           default:
             return "no_arg";
-        } break;
+        }
+        break;
       case "get_board_width":
         return this.width;
       case "get_board_height":
@@ -229,7 +286,12 @@ export class World {
     }
   }
 
+  autoTurns() {
+    setInterval(() => this.turn(), this.MILLISECONDS_BETWEEN_TURNS);
+  }
+
   // END AGENT HANDLING SECTION //
+
   testRenderLocation() {
     console.log(this.renderLocation);
   }

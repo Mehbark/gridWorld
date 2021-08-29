@@ -4,6 +4,7 @@ export class Agent {
     startY,
     behaviorFunction,
     initFunction = pass(),
+    name = "",
     initialCharacter = "@",
     initialColor = "black"
   ) {
@@ -21,7 +22,7 @@ export function exampleBehaviorFunction(lastResult) {
   if (lastResult === this.character || lastResult === undefined) {
     this.counter++;
     if (this.counter % 2 === 1) {
-      return ["paint", "black"];
+      return ["paint", "blue"];
     } else {
       return ["move", "right"];
     }
