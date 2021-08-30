@@ -21,6 +21,8 @@ export class World {
     renderLocation,
     agentList,
     MILLISECONDS_BETWEEN_TURNS = 3000,
+    LOGGING = false,
+    LOG_LOCATION = undefined,
     DEFAULT_BG_COLOR = "white",
     DEFAULT_FG_COLOR = "black",
     BACKGROUND_CHAR = " ",
@@ -33,6 +35,8 @@ export class World {
     this.lastCommandResultList = [];
 
     this.MILLISECONDS_BETWEEN_TURNS = MILLISECONDS_BETWEEN_TURNS;
+    this.LOGGING = LOGGING;
+    this.LOG_LOCATION = LOG_LOCATION;
     this.DEFAULT_BG_COLOR = DEFAULT_BG_COLOR;
     this.DEFAULT_FG_COLOR = DEFAULT_FG_COLOR;
     this.BACKGROUND_CHAR = BACKGROUND_CHAR;
@@ -179,9 +183,27 @@ export class World {
 
   // BEGIN AGENT HANDLING SECTION //
 
+  logEntry(text) {
+    // if (this.LOG_LOCATION.value.split("\n").length >= 10) {
+    //   const shorter = this.LOG_LOCATION.value.split("\n");
+    //   shorter.pop();
+
+    //   this.LOG_LOCATION.value = shorter.join("\n");
+    // }
+    this.LOG_LOCATION.value += text;
+    this.LOG_LOCATION.scrollTop = this.LOG_LOCATION.scrollHeight;
+  }
   //Agent behavior functions should return an array of up to two items, one command, and one argument for the command if necessary
-  agentTurn(agent, lastResult) {
+  handleAgentRequest(agent, lastResult) {
     const agentRequest = agent.behaviorFunction(lastResult);
+    if (this.LOGGING) {
+      if (agentRequest !== undefined && agentRequest !== "no_request") {
+        this.logEntry(
+          `\n${agent.name} requests "${agentRequest[0]} ${agentRequest[1]}", `
+        );
+        this.LOG_LOCATION.scrollTop = this.LOG_LOCATION.scrollHeight;
+      }
+    }
     if (agentRequest === undefined) {
       return "no_request";
     }
@@ -283,6 +305,13 @@ export class World {
       default:
         return "no_request";
     }
+  }
+  agentTurn(agent, lastResult) {
+    const response = this.handleAgentRequest(agent, lastResult);
+    if (this.LOGGING) {
+      this.logEntry(`response is "${response}".`);
+    }
+    return response;
   }
 
   turn() {

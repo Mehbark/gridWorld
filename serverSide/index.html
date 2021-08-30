@@ -7,14 +7,24 @@
       pre {
         font-family: "JetBrains Mono", monospace;
       } */
+      #game-log {
+        border: none;
+        font-size: 14px;
+        outline: 1px solid black;
+        resize: none;
+        height: 2.5vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
       pre {
         line-height: 25%;
+        margin-bottom: 0;
       }
     </style>
   </head>
   <body>
-    <div id="game-world">
-
-    </div>
+    <div id="game-world"></div>
+    <textarea id="game-log" readonly="true" rows="1"></textarea>
   </body>
 </html>

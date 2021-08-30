@@ -21,7 +21,16 @@ window.onload = function () {
     exampleInitFunction,
     "bob"
   );
-  var test = new World(238, 56, $("#game-world"), [testAgent, testAgent2], 0);
+  var test = new World(
+    238,
+    55,
+    $("#game-world"),
+    [testAgent, testAgent2],
+    0,
+    false,
+    $("#game-log")
+  );
+  console.log(test.LOG_LOCATION);
   test.testRenderLocation();
   test.autoTurns();
   // test.setForegroundColorOfCharacter(0, 0, "red");
