@@ -23,7 +23,7 @@ window.onload = function () {
   );
   var test = new World(
     238,
-    55,
+    56,
     $("#game-world"),
     [testAgent, testAgent2],
     0,

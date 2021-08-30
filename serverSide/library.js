@@ -33,6 +33,7 @@ export class World {
     this.renderLocation = renderLocation;
     this.agentList = agentList;
     this.lastCommandResultList = [];
+    this.agentPositions = [];
 
     this.MILLISECONDS_BETWEEN_TURNS = MILLISECONDS_BETWEEN_TURNS;
     this.LOGGING = LOGGING;
@@ -57,6 +58,7 @@ export class World {
       if (agent.initFunction !== undefined) {
         agent.initFunction();
       }
+      this.agentPositions.push(this.addAgent(agent));
       this.changeCharacter(agent.x, agent.y, agent.character);
       this.setForegroundColorOfCharacter(agent.x, agent.y);
       this.setBackgroundColorOfCharacter(agent.x, agent.y);
@@ -154,7 +156,7 @@ export class World {
     return text === this.BACKGROUND_CHAR;
   }
 
-  moveCharacter(fromX, fromY, toX, toY, agent) {
+  moveCharacter(fromX, fromY, toX, toY, agent, id) {
     let toBeMoved = this.getCharacter(fromX, fromY);
     if (toBeMoved === "out_of_bounds") {
       return "out_of_bounds";
@@ -166,6 +168,7 @@ export class World {
       if (agent !== undefined) {
         agent.x = toX;
         agent.y = toY;
+        this.agentPositions[id] = [toX, toY];
       }
       this.changeCharacter(toX, toY, this.clearCharacter(fromX, fromY));
       return this.getTextInCharacter(toX, toY);
@@ -183,6 +186,18 @@ export class World {
 
   // BEGIN AGENT HANDLING SECTION //
 
+  addAgent(agent) {
+    let startPos = [
+      Math.floor(Math.random() * this.width),
+      Math.floor(Math.random() * this.height),
+    ];
+    while (!this.checkIfClear(startPos[0]) || !this.checkIfClear(startPos[1])) {
+      agent.x = startPos[0];
+      agent.y = startPos[1];
+      return startPos;
+    }
+  }
+
   logEntry(text) {
     // if (this.LOG_LOCATION.value.split("\n").length >= 10) {
     //   const shorter = this.LOG_LOCATION.value.split("\n");
@@ -194,7 +209,7 @@ export class World {
     this.LOG_LOCATION.scrollTop = this.LOG_LOCATION.scrollHeight;
   }
   //Agent behavior functions should return an array of up to two items, one command, and one argument for the command if necessary
-  handleAgentRequest(agent, lastResult) {
+  handleAgentRequest(agent, lastResult, id) {
     const agentRequest = agent.behaviorFunction(lastResult);
     if (this.LOGGING) {
       if (agentRequest !== undefined && agentRequest !== "no_request") {
@@ -216,7 +231,8 @@ export class World {
               agent.y,
               agent.x,
               agent.y - 1,
-              agent
+              agent,
+              id
             );
           case "down":
             return this.moveCharacter(
@@ -224,7 +240,8 @@ export class World {
               agent.y,
               agent.x,
               agent.y + 1,
-              agent
+              agent,
+              id
             );
           case "left":
             return this.moveCharacter(
@@ -232,7 +249,8 @@ export class World {
               agent.y,
               agent.x - 1,
               agent.y,
-              agent
+              agent,
+              id
             );
           case "right":
             return this.moveCharacter(
@@ -240,7 +258,8 @@ export class World {
               agent.y,
               agent.x + 1,
               agent.y,
-              agent
+              agent,
+              id
             );
           default:
             return "no_arg";
@@ -306,8 +325,8 @@ export class World {
         return "no_request";
     }
   }
-  agentTurn(agent, lastResult) {
-    const response = this.handleAgentRequest(agent, lastResult);
+  agentTurn(agent, lastResult, id) {
+    const response = this.handleAgentRequest(agent, lastResult, id);
     if (this.LOGGING) {
       this.logEntry(`response is "${response}".`);
     }
@@ -316,9 +335,12 @@ export class World {
 
   turn() {
     for (let i = 0; i < this.agentList.length; i++) {
+      this.agentList[i].x = this.agentPositions[i][0];
+      this.agentList[i].y = this.agentPositions[i][1];
       this.lastCommandResultList[i] = this.agentTurn(
         this.agentList[i],
-        this.lastCommandResultList[i]
+        this.lastCommandResultList[i],
+        i
       );
     }
   }
