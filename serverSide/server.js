@@ -12,20 +12,33 @@ window.onload = function () {
     0,
     exampleBehaviorFunction,
     exampleInitFunction,
-    "carl"
+    "carl",
+    "c",
+    "black"
   );
   var testAgent2 = new Agent(
     0,
     1,
     exampleBehaviorFunction,
     exampleInitFunction,
-    "bob"
+    "bob",
+    "b",
+    "black"
+  );
+  var testAgent3 = new Agent(
+    0,
+    1,
+    exampleBehaviorFunction,
+    exampleInitFunction,
+    "bob",
+    "a",
+    "black"
   );
   var test = new World(
-    238,
-    56,
+    133,
+    108,
     $("#game-world"),
-    [testAgent, testAgent2],
+    [testAgent, testAgent2, testAgent3],
     0,
     false,
     $("#game-log")

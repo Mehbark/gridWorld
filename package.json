@@ -1,0 +1,19 @@
+{
+  "name": "gridworld",
+  "version": "1.0.0",
+  "description": "",
+  "main": "serverSide/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mehbark/gridWorld.git"
+  },
+  "author": "mehbark",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mehbark/gridWorld/issues"
+  },
+  "homepage": "https://github.com/Mehbark/gridWorld#readme"
+}

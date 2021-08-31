@@ -60,7 +60,7 @@ export class World {
       }
       this.agentPositions.push(this.addAgent(agent));
       this.changeCharacter(agent.x, agent.y, agent.character);
-      this.setForegroundColorOfCharacter(agent.x, agent.y);
+      this.setForegroundColorOfCharacter(agent.x, agent.y, agent.color);
       this.setBackgroundColorOfCharacter(agent.x, agent.y);
     });
   }
